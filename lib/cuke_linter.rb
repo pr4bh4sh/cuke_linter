@@ -45,7 +45,11 @@ module CukeLinter
 
     # Lints the given model trees and file paths using the given linting objects and formatting
     # the results with the given formatters and their respective output locations
-    def lint(file_paths: [], model_trees: [], linters: registered_linters.values, formatters: [[CukeLinter::PrettyFormatter.new]]) # rubocop:disable Metrics/LineLength
+    # @param [Array] file_paths: List of individual feature files path
+    # @param [Array] model_trees: List of directory path containing feature files
+    # @param [Array] linters: List of custom linters class object
+    # @param [Array<Array<CukeLinter::PrettyFormatter>>] formatters: List of custom formatters
+    def lint(file_paths: [], model_trees: [], linters: [], formatters: [[CukeLinter::PrettyFormatter.new]]) # rubocop:disable Metrics/LineLength
       # TODO: Test this?
       # Because directive memoization is based on a model's `#object_id` and Ruby reuses object IDs over the
       # life of a program as objects are garbage collected, it is not safe to remember the IDs forever. However,
@@ -56,6 +60,7 @@ module CukeLinter
       model_trees                  = [CukeModeler::Directory.new(Dir.pwd)] if model_trees.empty? && file_paths.empty?
       file_path_models             = collect_file_path_models(file_paths)
       model_sets                   = model_trees + file_path_models
+      linters = registered_linters.values + linters
 
       linting_data = lint_models(model_sets, linters)
       format_data(formatters, linting_data)
